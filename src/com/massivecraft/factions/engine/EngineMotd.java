@@ -1,5 +1,13 @@
 package com.massivecraft.factions.engine;
 
+import java.util.List;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerJoinEvent;
+
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MConf;
@@ -8,13 +16,6 @@ import com.massivecraft.massivecore.Engine;
 import com.massivecraft.massivecore.mixin.MixinActual;
 import com.massivecraft.massivecore.mixin.MixinMessage;
 import com.massivecraft.massivecore.util.MUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.player.PlayerJoinEvent;
-
-import java.util.List;
 
 public class EngineMotd extends Engine
 {
