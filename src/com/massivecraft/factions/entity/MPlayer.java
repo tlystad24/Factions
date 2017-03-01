@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import com.massivecraft.factions.EconomyParticipator;
 import com.massivecraft.factions.Factions;
@@ -18,10 +17,9 @@ import com.massivecraft.factions.Rel;
 import com.massivecraft.factions.RelationParticipator;
 import com.massivecraft.factions.event.EventFactionsChunkChangeType;
 import com.massivecraft.factions.event.EventFactionsChunksChange;
-import com.massivecraft.factions.event.EventFactionsDisband;
 import com.massivecraft.factions.event.EventFactionsMembershipChange;
-import com.massivecraft.factions.event.EventFactionsRemovePlayerMillis;
 import com.massivecraft.factions.event.EventFactionsMembershipChange.MembershipChangeReason;
+import com.massivecraft.factions.event.EventFactionsRemovePlayerMillis;
 import com.massivecraft.factions.mixin.PowerMixin;
 import com.massivecraft.factions.util.RelationUtil;
 import com.massivecraft.massivecore.mixin.MixinSenderPs;
@@ -31,7 +29,6 @@ import com.massivecraft.massivecore.ps.PSFormatHumanSpace;
 import com.massivecraft.massivecore.store.SenderEntity;
 import com.massivecraft.massivecore.util.IdUtil;
 import com.massivecraft.massivecore.util.MUtil;
-import com.massivecraft.massivecore.util.Txt;
 import com.massivecraft.massivecore.xlib.gson.annotations.SerializedName;
 
 public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipator
@@ -52,15 +49,15 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 	@Override
 	public MPlayer load(MPlayer that)
 	{
-		this.setLastActivityMillis(that.lastActivityMillis);
-		this.setFactionId(that.factionId);
-		this.setRole(that.role);
-		this.setTitle(that.title);
-		this.setPowerBoost(that.powerBoost);
-		this.setPower(that.power);
-		this.setMapAutoUpdating(that.mapAutoUpdating);
-		this.setOverriding(that.overriding);
-		this.setTerritoryInfoTitles(that.territoryInfoTitles);
+		this.lastActivityMillis = that.lastActivityMillis;
+		this.factionId = that.factionId;
+		this.role = that.role;
+		this.title = that.title;
+		this.powerBoost = that.powerBoost;
+		this.power = that.power;
+		this.mapAutoUpdating = that.mapAutoUpdating;
+		this.overriding = that.overriding;
+		this.territoryInfoTitles = that.territoryInfoTitles;
 
 		return this;
 	}
@@ -225,14 +222,11 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 
 	public void setLastActivityMillis(long lastActivityMillis)
 	{
-		// Clean input
-		long target = lastActivityMillis;
-
 		// Detect Nochange
-		if (MUtil.equals(this.lastActivityMillis, target)) return;
+		if (MUtil.equals(this.lastActivityMillis, lastActivityMillis)) return;
 
 		// Apply
-		this.lastActivityMillis = target;
+		this.lastActivityMillis = lastActivityMillis;
 
 		// Mark as changed
 		this.changed();
@@ -246,26 +240,17 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 	// -------------------------------------------- //
 	// FIELD: factionId
 	// -------------------------------------------- //
-
-	@Deprecated
-	public String getDefaultFactionId()
-	{
-		return MConf.get().defaultPlayerFactionId;
-	}
-
+	
 	// This method never returns null
 	public String getFactionId()
 	{
-		if (this.factionId == null) return MConf.get().defaultPlayerFactionId;
-		return this.factionId;
+		return this.convertGet(this.factionId, MConf.get().defaultPlayerFactionId);
 	}
 
 	// This method never returns null
 	public Faction getFaction()
 	{
-		Faction ret = Faction.get(this.getFactionId());
-		if (ret == null) ret = Faction.get(MConf.get().defaultPlayerFactionId);
-		return ret;
+		return Faction.get(this.getFactionId());
 	}
 
 	public boolean hasFaction()
@@ -280,14 +265,11 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 		// Before
 		String beforeId = this.factionId;
 
-		// After
-		String afterId = factionId;
-
 		// NoChange
-		if (MUtil.equals(beforeId, afterId)) return;
+		if (MUtil.equals(beforeId, factionId)) return;
 
 		// Apply
-		this.factionId = afterId;
+		this.factionId = factionId;
 
 		// Must be attached and initialized
 		if (!this.attached()) return;
@@ -315,31 +297,18 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 	// FIELD: role
 	// -------------------------------------------- //
 
-	@Deprecated
-	public Rel getDefaultRole()
-	{
-		return MConf.get().defaultPlayerRole;
-	}
-
 	public Rel getRole()
 	{
-		if (this.role == null) return MConf.get().defaultPlayerRole;
-		return this.role;
+		return this.convertGet(this.role, MConf.get().defaultPlayerRole);
 	}
 
 	public void setRole(Rel role)
 	{
-		// Clean input
-		Rel target = role;
-
 		// Detect Nochange
-		if (MUtil.equals(this.role, target)) return;
+		if (MUtil.equals(this.role, role)) return;
 
 		// Apply
-		this.role = target;
-
-		// Mark as changed
-		this.changed();
+		this.role = this.convertSet(role, MConf.get().defaultPlayerRole);
 	}
 
 	// -------------------------------------------- //
@@ -353,37 +322,26 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 
 	public String getTitle()
 	{
-		if (this.hasTitle()) return this.title;
-		return Lang.PLAYER_NOTITLE;
+		return this.convertGet(this.title, Lang.PLAYER_NOTITLE);
 	}
 
 	public void setTitle(String title)
 	{
 		// Clean input
-		String target = title;
-		if (target != null)
+		if (title != null)
 		{
-			target = target.trim();
-			if (target.length() == 0)
+			title = title.trim();
+			if (title.length() == 0)
 			{
-				target = null;
+				title = null;
 			}
 		}
 
-		// NOTE: That we parse the title here is considered part of the 1.8 -->
-		// 2.0 migration.
-		// This should be removed once the migration phase is considered to be
-		// over.
-		if (target != null)
-		{
-			target = Txt.parse(target);
-		}
-
 		// Detect Nochange
-		if (MUtil.equals(this.title, target)) return;
+		if (MUtil.equals(this.title, title)) return;
 
 		// Apply
-		this.title = target;
+		this.title = title;
 
 		// Mark as changed
 		this.changed();
@@ -395,25 +353,16 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 
 	public double getPowerBoost()
 	{
-		Double ret = this.powerBoost;
-		if (ret == null) ret = 0D;
-		return ret;
+		return this.convertGet(this.powerBoost, 0D);
 	}
 
 	public void setPowerBoost(Double powerBoost)
 	{
-		// Clean input
-		Double target = powerBoost;
-		if (target == null || target == 0) target = null;
-
 		// Detect Nochange
-		if (MUtil.equals(this.powerBoost, target)) return;
+		if (MUtil.equals(this.powerBoost, powerBoost)) return;
 
 		// Apply
-		this.powerBoost = target;
-
-		// Mark as changed
-		this.changed();
+		this.powerBoost = this.convertSet(powerBoost, 0D);
 	}
 
 	public boolean hasPowerBoost()
@@ -453,13 +402,9 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 	}
 
 	// MIXIN: FINER
-
 	public double getLimitedPower(double power)
 	{
-		power = Math.max(power, this.getPowerMin());
-		power = Math.min(power, this.getPowerMax());
-
-		return power;
+		return MUtil.limitNumber(power, this.getPowerMin(), this.getPowerMax());
 	}
 
 	public int getPowerMaxRounded()
@@ -478,38 +423,22 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 	}
 
 	// RAW
-
-	@Deprecated
-	public double getDefaultPower()
-	{
-		return MConf.get().defaultPlayerPower;
-	}
-
 	public double getPower()
 	{
-		Double ret = this.power;
-		if (ret == null) ret = MConf.get().defaultPlayerPower;
-		ret = this.getLimitedPower(ret);
-		return ret;
+		Double ret = this.convertGet(this.power, MConf.get().defaultPlayerPower);
+		return this.getLimitedPower(ret);
 	}
 
 	public void setPower(Double power)
 	{
-		// Clean input
-		Double target = power;
-
 		// Detect Nochange
-		if (MUtil.equals(this.power, target)) return;
+		if (MUtil.equals(this.power, power)) return;
 
 		// Apply
-		this.power = target;
-
-		// Mark as changed
-		this.changed();
+		this.power = this.convertSet(power, 0D);
 	}
 
 	// FINER
-
 	public int getPowerRounded()
 	{
 		return (int) Math.round(this.getPower());
@@ -528,18 +457,11 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 
 	public void setMapAutoUpdating(Boolean mapAutoUpdating)
 	{
-		// Clean input
-		Boolean target = mapAutoUpdating;
-		if (MUtil.equals(target, false)) target = null;
-
 		// Detect Nochange
-		if (MUtil.equals(this.mapAutoUpdating, target)) return;
+		if (MUtil.equals(this.mapAutoUpdating, mapAutoUpdating)) return;
 
 		// Apply
-		this.mapAutoUpdating = target;
-
-		// Mark as changed
-		this.changed();
+		this.mapAutoUpdating = this.convertSet(mapAutoUpdating);
 	}
 
 	// -------------------------------------------- //
@@ -548,32 +470,22 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 
 	public boolean isOverriding()
 	{
-		if (this.overriding == null) return false;
-		if (this.overriding == false) return false;
-
+		if (!Boolean.TRUE.equals(this.overriding)) return false;
 		if (!this.hasPermission(Perm.OVERRIDE, true))
 		{
 			this.setOverriding(false);
 			return false;
 		}
-
 		return true;
 	}
 
 	public void setOverriding(Boolean overriding)
 	{
-		// Clean input
-		Boolean target = overriding;
-		if (MUtil.equals(target, false)) target = null;
-
 		// Detect Nochange
-		if (MUtil.equals(this.overriding, target)) return;
+		if (MUtil.equals(this.overriding, overriding)) return;
 
 		// Apply
-		this.overriding = target;
-
-		// Mark as changed
-		this.changed();
+		this.overriding = this.convertSet(overriding);
 	}
 
 	// -------------------------------------------- //
@@ -583,21 +495,16 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 	public boolean isTerritoryInfoTitles()
 	{
 		if (!MixinTitle.get().isAvailable()) return false;
-		if (this.territoryInfoTitles == null) return MConf.get().territoryInfoTitlesDefault;
-		return this.territoryInfoTitles;
+		return this.convertGet(this.territoryInfoTitles, MConf.get().territoryInfoTitlesDefault);
 	}
 
 	public void setTerritoryInfoTitles(Boolean territoryInfoTitles)
 	{
-		// Clean input
-		Boolean target = territoryInfoTitles;
-		if (MUtil.equals(target, MConf.get().territoryInfoTitlesDefault)) target = null;
-
 		// Detect Nochange
-		if (MUtil.equals(this.territoryInfoTitles, target)) return;
+		if (MUtil.equals(this.territoryInfoTitles, territoryInfoTitles)) return;
 
 		// Apply
-		this.territoryInfoTitles = target;
+		this.territoryInfoTitles = this.convertSet(territoryInfoTitles, MConf.get().territoryInfoTitlesDefault);
 
 		// Mark as changed
 		this.changed();
@@ -610,55 +517,39 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 	public String getFactionName()
 	{
 		Faction faction = this.getFaction();
-		if (faction.isNone()) return "";
-		return faction.getName();
+		return faction.isNone() ? "" : faction.getName();
 	}
 
 	// Base concatenations:
-
-	public String getNameAndSomething(String color, String something)
+	public String getNameAndSomething(ChatColor color, String something)
 	{
-		String ret = "";
-		ret += color;
-		ret += this.getRole().getPrefix();
+		// Create
+		StringBuilder ret = new StringBuilder(6);
+		
+		// Fill
+		ret.append(color);
+		ret.append(this.getRole().getPrefix());
 		if (something != null && something.length() > 0)
 		{
-			ret += something;
-			ret += " ";
-			ret += color;
+			ret.append(something);
+			ret.append(" ");
+			if (color != null) ret.append(color.toString());
 		}
-		ret += this.getName();
-		return ret;
+		ret.append(this.getName());
+		
+		// Return
+		return ret.toString();
 	}
 
 	public String getNameAndFactionName()
 	{
-		return this.getNameAndSomething("", this.getFactionName());
+		return this.getNameAndSomething(null, this.getFactionName());
 	}
 
-	public String getNameAndTitle(String color)
-	{
-		if (this.hasTitle())
-		{
-			return this.getNameAndSomething(color, this.getTitle());
-		}
-		else
-		{
-			return this.getNameAndSomething(color, null);
-		}
-	}
-
-	// Colored concatenations:
 	// These are used in information messages
-
-	public String getNameAndTitle(Faction faction)
+	public String getNameAndTitle(RelationParticipator rp)
 	{
-		return this.getNameAndTitle(this.getColorTo(faction).toString());
-	}
-
-	public String getNameAndTitle(MPlayer mplayer)
-	{
-		return this.getNameAndTitle(this.getColorTo(mplayer).toString());
+		return this.getNameAndSomething(this.getColorTo(rp), this.hasTitle() ? this.getTitle() : null);
 	}
 
 	// -------------------------------------------- //
@@ -693,20 +584,6 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 	public ChatColor getColorTo(RelationParticipator observer)
 	{
 		return RelationUtil.getColorOfThatToMe(this, observer);
-	}
-
-	// -------------------------------------------- //
-	// HEALTH
-	// -------------------------------------------- //
-
-	public void heal(int amnt)
-	{
-		Player player = this.getPlayer();
-		if (player == null)
-		{
-			return;
-		}
-		player.setHealth(player.getHealth() + amnt);
 	}
 
 	// -------------------------------------------- //
@@ -765,12 +642,10 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 		if (this.getRole() == Rel.LEADER)
 		{
 			Faction faction = this.getFaction();
-			if (faction != null)
-			{
-				this.getFaction().promoteNewLeader();
-			}
+			if (faction != null) this.getFaction().promoteNewLeader();
 		}
-
+		
+		// Remove
 		this.leave();
 		this.detach();
 
@@ -783,11 +658,10 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 
 	public void leave()
 	{
-		Faction myFaction = this.getFaction();
+		Faction faction = this.getFaction();
+		boolean permanent = faction.getFlag(MFlag.getFlagPermanent());
 
-		boolean permanent = myFaction.getFlag(MFlag.getFlagPermanent());
-
-		if (myFaction.getMPlayers().size() > 1)
+		if (faction.getMPlayers().size() > 1)
 		{
 			if (!permanent && this.getRole() == Rel.LEADER)
 			{
@@ -803,39 +677,28 @@ public class MPlayer extends SenderEntity<MPlayer> implements EconomyParticipato
 		}
 
 		// Event
-		EventFactionsMembershipChange membershipChangeEvent = new EventFactionsMembershipChange(this.getSender(), this, myFaction, MembershipChangeReason.LEAVE);
+		EventFactionsMembershipChange membershipChangeEvent = new EventFactionsMembershipChange(this.getSender(), this, faction, MembershipChangeReason.LEAVE);
 		membershipChangeEvent.run();
 		if (membershipChangeEvent.isCancelled()) return;
 
-		if (myFaction.isNormal())
+		if (faction.isNormal())
 		{
-			for (MPlayer mplayer : myFaction.getMPlayersWhereOnline(true))
+			for (MPlayer mplayer : faction.getMPlayersWhereOnline(true))
 			{
-				mplayer.msg("%s<i> left %s<i>.", this.describeTo(mplayer, true), myFaction.describeTo(mplayer));
+				mplayer.msg("%s<i> left %s<i>.", this.describeTo(mplayer, true), faction.describeTo(mplayer));
 			}
 
 			if (MConf.get().logFactionLeave)
 			{
-				Factions.get().log(this.getName() + " left the faction: " + myFaction.getName());
+				Factions.get().log(this.getName() + " left the faction: " + faction.getName());
 			}
 		}
 
 		this.resetFactionData();
 
-		if (myFaction.isNormal() && !permanent && myFaction.getMPlayers().isEmpty())
+		if (faction.isNormal() && faction.getMPlayers().isEmpty())
 		{
-			EventFactionsDisband eventFactionsDisband = new EventFactionsDisband(this.getSender(), myFaction);
-			eventFactionsDisband.run();
-			if (!eventFactionsDisband.isCancelled())
-			{
-				// Remove this faction
-				this.msg("%s <i>was disbanded since you were the last player.", myFaction.describeTo(this, true));
-				if (MConf.get().logFactionDisband)
-				{
-					Factions.get().log("The faction " + myFaction.getName() + " (" + myFaction.getId() + ") was disbanded due to the last player (" + this.getName() + ") leaving.");
-				}
-				myFaction.detach();
-			}
+			faction.attemptDisband(this.getSender(), "due to the last player (" + this.getName() + ") leaving");
 		}
 	}
 

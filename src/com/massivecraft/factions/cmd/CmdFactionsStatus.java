@@ -68,7 +68,7 @@ public class CmdFactionsStatus extends FactionsCommand
 			public String toString(MPlayer mplayer, int index)
 			{
 				// Name
-				String displayName = mplayer.getNameAndSomething(msender.getColorTo(mplayer).toString(), "");
+				String displayName = mplayer.getNameAndSomething(msender.getColorTo(mplayer), "");
 				int length = 15 - displayName.length();
 				length = length <= 0 ? 1 : length;
 				String whiteSpace = Txt.repeat(" ", length);

@@ -1,9 +1,7 @@
 package com.massivecraft.factions.entity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -11,11 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import com.massivecraft.factions.EconomyParticipator;
 import com.massivecraft.factions.FactionEqualsPredicate;
@@ -24,10 +20,12 @@ import com.massivecraft.factions.Lang;
 import com.massivecraft.factions.PredicateRole;
 import com.massivecraft.factions.Rel;
 import com.massivecraft.factions.RelationParticipator;
+import com.massivecraft.factions.event.EventFactionsDisband;
 import com.massivecraft.factions.util.MiscUtil;
 import com.massivecraft.factions.util.RelationUtil;
 import com.massivecraft.massivecore.Named;
 import com.massivecraft.massivecore.collections.MassiveList;
+import com.massivecraft.massivecore.collections.MassiveMap;
 import com.massivecraft.massivecore.collections.MassiveMapDef;
 import com.massivecraft.massivecore.collections.MassiveSet;
 import com.massivecraft.massivecore.collections.MassiveTreeSetDef;
@@ -62,16 +60,16 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	@Override
 	public Faction load(Faction that)
 	{
-		this.setName(that.name);
-		this.setDescription(that.description);
-		this.setMotd(that.motd);
-		this.setCreatedAtMillis(that.createdAtMillis);
-		this.setHome(that.home);
-		this.setPowerBoost(that.powerBoost);
-		this.setInvitedPlayerIds(that.invitedPlayerIds);
-		this.setRelationWishes(that.relationWishes);
-		this.setFlagIds(that.flags);
-		this.setPermIds(that.perms);
+		this.name = that.name;
+		this.description = that.description;
+		this.motd = that.motd;
+		this.createdAtMillis = that.createdAtMillis;
+		this.home = that.home;
+		this.powerBoost = that.powerBoost;
+		this.invitedPlayerIds = that.invitedPlayerIds;
+		this.relationWishes = that.relationWishes;
+		this.flags = that.flags;
+		this.perms = that.perms;
 		
 		return this;
 	}
@@ -177,7 +175,6 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// RAW
-	
 	@Override
 	public String getName()
 	{
@@ -193,14 +190,11 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	
 	public void setName(String name)
 	{
-		// Clean input
-		String target = name;
-		
 		// Detect Nochange
-		if (MUtil.equals(this.name, target)) return;
+		if (MUtil.equals(this.name, name)) return;
 
 		// Apply
-		this.name = target;
+		this.name = name;
 		
 		// Mark as changed
 		this.changed();
@@ -229,37 +223,18 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// RAW
-	
-	public boolean hasDescription()
-	{
-		return this.description != null;
-	}
-	
 	public String getDescription()
 	{
-		if (this.hasDescription()) return this.description;
-		return Lang.FACTION_NODESCRIPTION;
+		return this.convertGet(this.description, Lang.FACTION_NODESCRIPTION);
 	}
 	
 	public void setDescription(String description)
 	{
-		// Clean input
-		String target = description;
-		if (target != null)
-		{
-			target = target.trim();
-			// This code should be kept for a while to clean out the previous default text that was actually stored in the database.
-			if (target.length() == 0 || target.equals("Default faction description :("))
-			{
-				target = null;
-			}
-		}
-		
 		// Detect Nochange
-		if (MUtil.equals(this.description, target)) return;
+		if (MUtil.equals(this.description, description)) return;
 
 		// Apply
-		this.description = target;
+		this.description = this.convertSet(description, "");
 		
 		// Mark as changed
 		this.changed();
@@ -270,7 +245,6 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// RAW
-	
 	public boolean hasMotd()
 	{
 		return this.motd != null;
@@ -278,35 +252,22 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	
 	public String getMotd()
 	{
-		if (this.hasMotd()) return Txt.parse(this.motd);
-		return Lang.FACTION_NOMOTD;
+		return Txt.parse(this.convertGet(this.motd, Lang.FACTION_NOMOTD));
 	}
 	
 	public void setMotd(String description)
 	{
-		// Clean input
-		String target = description;
-		if (target != null)
-		{
-			target = target.trim();
-			if (target.length() == 0)
-			{
-				target = null;
-			}
-		}
-		
 		// Detect Nochange
-		if (MUtil.equals(this.motd, target)) return;
+		if (MUtil.equals(this.motd, description)) return;
 
 		// Apply
-		this.motd = target;
+		this.motd = this.convertSet(description, "");
 		
 		// Mark as changed
 		this.changed();
 	}
 	
 	// FINER
-	
 	public List<Object> getMotdMessages()
 	{
 		// Create
@@ -337,14 +298,11 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	
 	public void setCreatedAtMillis(long createdAtMillis)
 	{
-		// Clean input
-		long target = createdAtMillis;
-		
 		// Detect Nochange
 		if (MUtil.equals(this.createdAtMillis, createdAtMillis)) return;
 
 		// Apply
-		this.createdAtMillis = target;
+		this.createdAtMillis = createdAtMillis;
 		
 		// Mark as changed
 		this.changed();
@@ -383,14 +341,11 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	
 	public void setHome(PS home)
 	{
-		// Clean input
-		PS target = home;
-		
 		// Detect Nochange
-		if (MUtil.equals(this.home, target)) return;
+		if (MUtil.equals(this.home, home)) return;
 		
 		// Apply
-		this.home = target;
+		this.home = home;
 		
 		// Mark as changed
 		this.changed();
@@ -401,26 +356,18 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// RAW
-	
 	public double getPowerBoost()
 	{
-		Double ret = this.powerBoost;
-		if (ret == null) ret = 0D;
-		return ret;
+		return this.convertGet(this.powerBoost, 0D);
 	}
 	
 	public void setPowerBoost(Double powerBoost)
 	{
-		// Clean input
-		Double target = powerBoost;
-		
-		if (target == null || target == 0) target = null;
-		
 		// Detect Nochange
-		if (MUtil.equals(this.powerBoost, target)) return;
+		if (MUtil.equals(this.powerBoost, powerBoost)) return;
 		
 		// Apply
-		this.powerBoost = target;
+		this.powerBoost = this.convertSet(powerBoost, 0D);
 		
 		// Mark as changed
 		this.changed();
@@ -431,7 +378,6 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// Nowadays this is a flag!
-	
 	@Deprecated
 	public boolean isDefaultOpen()
 	{
@@ -457,37 +403,25 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// RAW
-	
-	public TreeSet<String> getInvitedPlayerIds()
+	public MassiveTreeSetDef<String, ComparatorCaseInsensitive> getInvitedPlayerIds()
 	{
 		return this.invitedPlayerIds;
 	}
 	
-	public void setInvitedPlayerIds(Collection<String> invitedPlayerIds)
+	public void setInvitedPlayerIds(MassiveTreeSetDef<String, ComparatorCaseInsensitive> invitedPlayerIds)
 	{
-		// Clean input
-		MassiveTreeSetDef<String, ComparatorCaseInsensitive> target = new MassiveTreeSetDef<String, ComparatorCaseInsensitive>(ComparatorCaseInsensitive.get());
-		if (invitedPlayerIds != null)
-		{
-			for (String invitedPlayerId : invitedPlayerIds)
-			{
-				target.add(invitedPlayerId.toLowerCase());
-			}
-		}
-		
 		// Detect Nochange
-		if (MUtil.equals(this.invitedPlayerIds, target)) return;
+		if (MUtil.equals(this.invitedPlayerIds, invitedPlayerIds)) return;
 		
 		// Apply
-		this.invitedPlayerIds = target;
+		this.invitedPlayerIds = invitedPlayerIds;
 		
 		// Mark as changed
 		this.changed();
 	}
 	
 	// FINER
-	
-	public boolean isInvited(String playerId)
+	private boolean isInvited(String playerId)
 	{
 		return this.getInvitedPlayerIds().contains(playerId);
 	}
@@ -497,9 +431,12 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		return this.isInvited(mplayer.getId());
 	}
 	
-	public boolean setInvited(String playerId, boolean invited)
+	private boolean setInvited(String playerId, boolean invited)
 	{
-		List<String> invitedPlayerIds = new ArrayList<String>(this.getInvitedPlayerIds());
+		// Get
+		MassiveTreeSetDef<String, ComparatorCaseInsensitive> invitedPlayerIds = new MassiveTreeSetDef<String, ComparatorCaseInsensitive>(ComparatorCaseInsensitive.get(), this.getInvitedPlayerIds());
+		
+		// Set
 		boolean ret;
 		if (invited)
 		{
@@ -509,9 +446,10 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		{
 			ret = invitedPlayerIds.remove(playerId);
 		}
-		this.setInvitedPlayerIds(invitedPlayerIds);
-		return ret;
 		
+		// Return
+		this.changed();
+		return ret;
 	}
 	
 	public void setInvited(MPlayer mplayer, boolean invited)
@@ -521,13 +459,17 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	
 	public List<MPlayer> getInvitedMPlayers()
 	{
+		// Create
 		List<MPlayer> mplayers = new ArrayList<MPlayer>();
 		
+		// Fill
 		for (String id : this.getInvitedPlayerIds())
 		{	
 			MPlayer mplayer = MPlayer.get(id);
-			mplayers.add(mplayer);
+			if (mplayer != null) mplayers.add(mplayer);
 		}
+		
+		// Return
 		return mplayers;
 	}
 	
@@ -536,34 +478,27 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// RAW
-	
-	public Map<String, Rel> getRelationWishes()
+	public MassiveMapDef<String, Rel> getRelationWishes()
 	{
 		return this.relationWishes;
 	}
 	
-	public void setRelationWishes(Map<String, Rel> relationWishes)
+	public void setRelationWishes(MassiveMapDef<String, Rel> relationWishes)
 	{
-		// Clean input
-		MassiveMapDef<String, Rel> target = new MassiveMapDef<String, Rel>(relationWishes);
-		
 		// Detect Nochange
-		if (MUtil.equals(this.relationWishes, target)) return;
+		if (MUtil.equals(this.relationWishes, relationWishes)) return;
 		
 		// Apply
-		this.relationWishes = target;
+		this.relationWishes = relationWishes;
 		
 		// Mark as changed
 		this.changed();
 	}
 	
 	// FINER
-	
-	public Rel getRelationWish(String factionId)
+	private Rel getRelationWish(String factionId)
 	{
-		Rel ret = this.getRelationWishes().get(factionId);
-		if (ret == null) ret = Rel.NEUTRAL;
-		return ret;
+		return this.convertGet(this.getRelationWishes().get(factionId), Rel.NEUTRAL);
 	}
 	
 	public Rel getRelationWish(Faction faction)
@@ -571,9 +506,12 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		return this.getRelationWish(faction.getId());
 	}
 	
-	public void setRelationWish(String factionId, Rel rel)
+	private void setRelationWish(String factionId, Rel rel)
 	{
+		// Get
 		Map<String, Rel> relationWishes = this.getRelationWishes();
+		
+		// Set
 		if (rel == null || rel == Rel.NEUTRAL)
 		{
 			relationWishes.remove(factionId);
@@ -582,7 +520,9 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		{
 			relationWishes.put(factionId, rel);
 		}
-		this.setRelationWishes(relationWishes);
+		
+		// Changed
+		this.changed();
 	}
 	
 	public void setRelationWish(Faction faction, Rel rel)
@@ -595,7 +535,6 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// RAW
-	
 	public Map<MFlag, Boolean> getFlags()
 	{
 		// We start with default values ...
@@ -606,17 +545,16 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		}
 		
 		// ... and if anything is explicitly set we use that info ...
-		Iterator<Entry<String, Boolean>> iter = this.flags.entrySet().iterator();
-		while (iter.hasNext())
+		for (Iterator<Entry<String, Boolean>> it = this.flags.entrySet().iterator(); it.hasNext();)
 		{
 			// ... for each entry ...
-			Entry<String, Boolean> entry = iter.next();
+			Entry<String, Boolean> entry = it.next();
 			
 			// ... extract id and remove null values ...
-			String id = entry.getKey();					
+			String id = entry.getKey();
 			if (id == null)
 			{
-				iter.remove();
+				it.remove();
 				this.changed();
 				continue;
 			}
@@ -631,44 +569,19 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		return ret;
 	}
 	
-	public void setFlags(Map<MFlag, Boolean> flags)
+	private void setFlagIds(MassiveMapDef<String, Boolean> flagIds)
 	{
-		Map<String, Boolean> flagIds = new LinkedHashMap<String, Boolean>();
-		for (Entry<MFlag, Boolean> entry : flags.entrySet())
-		{
-			flagIds.put(entry.getKey().getId(), entry.getValue());
-		}
-		setFlagIds(flagIds);
-	}
-	
-	public void setFlagIds(Map<String, Boolean> flagIds)
-	{
-		// Clean input
-		MassiveMapDef<String, Boolean> target = new MassiveMapDef<String, Boolean>();
-		for (Entry<String, Boolean> entry : flagIds.entrySet())
-		{
-			String key = entry.getKey();
-			if (key == null) continue;
-			key = key.toLowerCase(); // Lowercased Keys Version 2.6.0 --> 2.7.0
-			
-			Boolean value = entry.getValue();
-			if (value == null) continue;
-			
-			target.put(key, value);
-		}
-
 		// Detect Nochange
-		if (MUtil.equals(this.flags, target)) return;
+		if (MUtil.equals(this.flags, flagIds)) return;
 		
 		// Apply
-		this.flags = new MassiveMapDef<String, Boolean>(target);
+		this.flags = flagIds;
 		
 		// Mark as changed
 		this.changed();
 	}
 	
 	// FINER
-	
 	public boolean getFlag(String flagId)
 	{
 		if (flagId == null) throw new NullPointerException("flagId");
@@ -685,17 +598,10 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	public boolean getFlag(MFlag flag)
 	{
 		if (flag == null) throw new NullPointerException("flag");
-		
-		String flagId = flag.getId();
-		if (flagId == null) throw new NullPointerException("flagId");
-		
-		Boolean ret = this.flags.get(flagId);
-		if (ret != null) return ret;
-		
-		return flag.isStandard();
+		return this.getFlag(flag.getId());
 	}
 	
-	public Boolean setFlag(String flagId, boolean value)
+	private Boolean setFlag(String flagId, boolean value)
 	{
 		if (flagId == null) throw new NullPointerException("flagId");
 		
@@ -708,12 +614,7 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	{
 		if (flag == null) throw new NullPointerException("flag");
 		
-		String flagId = flag.getId();
-		if (flagId == null) throw new NullPointerException("flagId");
-		
-		Boolean ret = this.flags.put(flagId, value);
-		if (ret == null || ret != value) this.changed();
-		return ret;
+		return this.setFlag(flag.getId(), value);
 	}
 	
 	// -------------------------------------------- //
@@ -721,52 +622,12 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	
 	// RAW
-	
-	public Map<MPerm, Set<Rel>> getPerms()
+	public MassiveMapDef<String, Set<Rel>> getPermIds()
 	{
-		// We start with default values ...
-		Map<MPerm, Set<Rel>> ret = new LinkedHashMap<MPerm, Set<Rel>>();
-		for (MPerm mperm : MPerm.getAll())
-		{
-			ret.put(mperm, new LinkedHashSet<Rel>(mperm.getStandard()));
-		}
-		
-		// ... and if anything is explicitly set we use that info ...
-		Iterator<Entry<String, Set<Rel>>> iter = this.perms.entrySet().iterator();
-		while (iter.hasNext())
-		{
-			// ... for each entry ...
-			Entry<String, Set<Rel>> entry = iter.next();
-			
-			// ... extract id and remove null values ...
-			String id = entry.getKey();					
-			if (id == null)
-			{
-				iter.remove();
-				continue;
-			}
-			
-			// ... resolve object and skip unknowns ...
-			MPerm mperm = MPerm.get(id);
-			if (mperm == null) continue;
-			
-			ret.put(mperm, new LinkedHashSet<Rel>(entry.getValue()));
-		}
-		
-		return ret;
+		return this.perms;
 	}
 	
-	public void setPerms(Map<MPerm, Set<Rel>> perms)
-	{
-		Map<String, Set<Rel>> permIds = new LinkedHashMap<String, Set<Rel>>();
-		for (Entry<MPerm, Set<Rel>> entry : perms.entrySet())
-		{
-			permIds.put(entry.getKey().getId(), entry.getValue());
-		}
-		setPermIds(permIds);
-	}
-	
-	public void setPermIds(Map<String, Set<Rel>> perms)
+	public void setPermIds(MassiveMapDef<String, Set<Rel>> perms)
 	{
 		// Clean input
 		MassiveMapDef<String, Set<Rel>> target = new MassiveMapDef<String, Set<Rel>>();
@@ -792,9 +653,57 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		this.changed();
 	}
 	
-	// FINER
+	// Finer
+	public Map<MPerm, Set<Rel>> getPerms()
+	{
+		// We start with default values ...
+		Map<MPerm, Set<Rel>> ret = new MassiveMap<>();
+		for (MPerm mperm : MPerm.getAll())
+		{
+			ret.put(mperm, new LinkedHashSet<>(mperm.getStandard()));
+		}
+		
+		// ... and if anything is explicitly set we use that info ...
+		for (Iterator<Entry<String, Set<Rel>>> it = this.perms.entrySet().iterator(); it.hasNext();)
+		{
+			// ... for each entry ...
+			Entry<String, Set<Rel>> entry = it.next();
+			
+			// ... extract id and remove null values ...
+			String id = entry.getKey();					
+			if (id == null)
+			{
+				it.remove();
+				continue;
+			}
+			
+			// ... resolve object and skip unknowns ...
+			MPerm mperm = MPerm.get(id);
+			if (mperm == null) continue;
+			
+			ret.put(mperm, new MassiveSet<>(entry.getValue()));
+		}
+		
+		return ret;
+	}
 	
-	public boolean isPermitted(String permId, Rel rel)
+	public void setPerms(Map<MPerm, Set<Rel>> perms)
+	{
+		// Create
+		MassiveMapDef<String, Set<Rel>> permIds = new MassiveMapDef<>();
+		
+		// Fill
+		for (Entry<MPerm, Set<Rel>> entry : perms.entrySet())
+		{
+			permIds.put(entry.getKey().getId(), entry.getValue());
+		}
+		
+		// Set
+		this.setPermIds(permIds);
+	}
+	
+	// FINEST
+	private boolean isPermitted(String permId, Rel rel)
 	{
 		if (permId == null) throw new NullPointerException("permId");
 		
@@ -810,35 +719,11 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	public boolean isPermitted(MPerm perm, Rel rel)
 	{
 		if (perm == null) throw new NullPointerException("perm");
-		
-		String permId = perm.getId();
-		if (permId == null) throw new NullPointerException("permId");
-		
-		Set<Rel> rels = this.perms.get(permId);
-		if (rels != null) return rels.contains(rel);
-		
-		return perm.getStandard().contains(rel);
+		return this.isPermitted(perm.getId(), rel);
 	}
 	
-	// ---
-	
-	public Set<Rel> getPermitted(MPerm perm)
+	private Set<Rel> getPermitted(String permId)
 	{
-		if (perm == null) throw new NullPointerException("perm");
-		
-		String permId = perm.getId();
-		if (permId == null) throw new NullPointerException("permId");
-		
-		Set<Rel> rels = this.perms.get(permId);
-		if (rels != null) return rels;
-		
-		return perm.getStandard();
-	}
-	
-	public Set<Rel> getPermitted(String permId)
-	{
-		if (permId == null) throw new NullPointerException("permId");
-		
 		Set<Rel> rels = this.perms.get(permId);
 		if (rels != null) return rels;
 		
@@ -848,49 +733,42 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		return perm.getStandard();
 	}
 	
-	@Deprecated
-	// Use getPermitted instead. It's much quicker although not immutable.
-	public Set<Rel> getPermittedRelations(MPerm perm)
+	public Set<Rel> getPermitted(MPerm perm)
 	{
-		return this.getPerms().get(perm);
+		if (perm == null) throw new NullPointerException("perm");
+		return this.getPermitted(perm.getId());
 	}
-	
-	// ---
-	// TODO: Fix these below. They are reworking the whole map.
 	
 	public void setPermittedRelations(MPerm perm, Set<Rel> rels)
 	{
-		Map<MPerm, Set<Rel>> perms = this.getPerms();
-		perms.put(perm, rels);
-		this.setPerms(perms);
+		this.getPermIds().put(perm.getId(), rels);
+		this.changed();
 	}
 	
 	public void setPermittedRelations(MPerm perm, Rel... rels)
 	{
-		Set<Rel> temp = new HashSet<Rel>();
-		temp.addAll(Arrays.asList(rels));
-		this.setPermittedRelations(perm, temp);
+		this.setPermittedRelations(perm, new MassiveSet<>(rels));
 	}
 	
 	public void setRelationPermitted(MPerm perm, Rel rel, boolean permitted)
 	{
-		Map<MPerm, Set<Rel>> perms = this.getPerms();
+		// Get
+		Map<String, Set<Rel>> perms = this.getPermIds();
+		String permId = perm.getId();
+		Set<Rel> rels = perms.get(permId);
 		
-		Set<Rel> rels = perms.get(perm);
-		
-		boolean changed;
+		// Change
 		if (permitted)
 		{
-			changed = rels.add(rel);
+			rels.add(rel);
 		}
 		else
 		{
-			changed = rels.remove(rel);
+			rels.remove(rel);
 		}
 		
-		this.setPerms(perms);
-		
-		if (changed) this.changed();
+		// Set
+		this.setPermittedRelations(perm, rels);
 	}
 	
 	// -------------------------------------------- //
@@ -1083,47 +961,11 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 		return ret.get(0);
 	}
 	
-	public List<CommandSender> getOnlineCommandSenders()
-	{
-		// Create Ret
-		List<CommandSender> ret = new ArrayList<CommandSender>();
-		
-		// Fill Ret
-		for (CommandSender sender : IdUtil.getLocalSenders())
-		{
-			if (MUtil.isntSender(sender)) continue;
-			
-			MPlayer mplayer = MPlayer.get(sender);
-			if (mplayer.getFaction() != this) continue;
-			
-			ret.add(sender);
-		}
-		
-		// Return Ret
-		return ret;
-	}
-	
-	public List<Player> getOnlinePlayers()
-	{
-		// Create Ret
-		List<Player> ret = new ArrayList<Player>();
-		
-		// Fill Ret
-		for (Player player : MUtil.getOnlinePlayers())
-		{
-			if (MUtil.isntPlayer(player)) continue;
-			
-			MPlayer mplayer = MPlayer.get(player);
-			if (mplayer.getFaction() != this) continue;
-			
-			ret.add(player);
-		}
-		
-		// Return Ret
-		return ret;
-	}
+	// -------------------------------------------- //
+	// NEW LEADER
+	// -------------------------------------------- //
 
-	// used when current leader is about to be removed from the faction; promotes new leader, or disbands faction if no other members left
+	// Used when current leader is about to be removed from the faction; promotes new leader, or disbands faction if no other members left
 	public void promoteNewLeader()
 	{
 		if ( ! this.isNormal()) return;
@@ -1131,51 +973,53 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 
 		MPlayer oldLeader = this.getLeader();
 
-		// get list of officers, or list of normal members if there are no officers
+		// Get list of officers, or list of normal members if there are no officers
 		List<MPlayer> replacements = this.getMPlayersWhereRole(Rel.OFFICER);
-		if (replacements == null || replacements.isEmpty())
+		if (replacements.isEmpty()) replacements = this.getMPlayersWhereRole(Rel.MEMBER);
+		if (replacements.isEmpty())
 		{
-			replacements = this.getMPlayersWhereRole(Rel.MEMBER);
+			this.attemptDisband(IdUtil.getConsole(), "since it has no members left.");
+			return;
 		}
-
-		if (replacements == null || replacements.isEmpty())
+		
+		// Promote new faction leader
+		if (oldLeader != null) oldLeader.setRole(Rel.MEMBER);
+		MPlayer mplayer = replacements.get(0);
+		mplayer.setRole(Rel.LEADER);
+		
+		// Inform
+		String leaderName = mplayer.getName();
+		this.msg("<i>Faction leader <h>%s<i> has been removed. %s<i> has been promoted as the new faction leader.", oldLeader == null ? "" : oldLeader.getName(), leaderName);
+		Factions.get().log("Faction " + this.getName() + " (" + this.getId() + ") leader was removed. Replacement leader: " + leaderName);
+	}
+	
+	public void attemptDisband(CommandSender sender, String reason)
+	{
+		// Faction leader is the only member; one-man faction
+		if (this.getFlag(MFlag.getFlagPermanent())) return;
+		
+		// Run an event
+		EventFactionsDisband eventFactionsDisband = new EventFactionsDisband(sender, this);
+		eventFactionsDisband.run();
+		if (eventFactionsDisband.isCancelled()) return;
+		
+		// No members left and faction isn't permanent, so disband it
+		this.logDisband(reason);
+		
+		for (MPlayer mplayer : MPlayerColl.get().getAllOnline())
 		{
-			// faction leader is the only member; one-man faction
-			if (this.getFlag(MFlag.getFlagPermanent()))
-			{
-				if (oldLeader != null)
-				{
-					// TODO: Where is the logic in this? Why MEMBER? Why not LEADER again? And why not OFFICER or RECRUIT?
-					oldLeader.setRole(Rel.MEMBER);
-				}
-				return;
-			}
-
-			// no members left and faction isn't permanent, so disband it
-			if (MConf.get().logFactionDisband)
-			{
-				Factions.get().log("The faction "+this.getName()+" ("+this.getId()+") has been disbanded since it has no members left.");
-			}
-
-			for (MPlayer mplayer : MPlayerColl.get().getAllOnline())
-			{
-				mplayer.msg("<i>The faction %s<i> was disbanded.", this.getName(mplayer));
-			}
-
-			this.detach();
+			mplayer.msg("<i>The faction %s<i> was disbanded.", this.getName(mplayer));
 		}
-		else
-		{
-			// promote new faction leader
-			if (oldLeader != null)
-			{
-				oldLeader.setRole(Rel.MEMBER);
-			}
-				
-			replacements.get(0).setRole(Rel.LEADER);
-			this.msg("<i>Faction leader <h>%s<i> has been removed. %s<i> has been promoted as the new faction leader.", oldLeader == null ? "" : oldLeader.getName(), replacements.get(0).getName());
-			Factions.get().log("Faction "+this.getName()+" ("+this.getId()+") leader was removed. Replacement leader: "+replacements.get(0).getName());
-		}
+		
+		this.detach();
+	}
+	
+	private void logDisband(String reason)
+	{
+		if (!MConf.get().logFactionDisband) return;
+		
+		String message = String.format("The faction %s (%s) has been disbanded %s.", this.getName(), this.getId(), reason);
+		Factions.get().log(message);
 	}
 	
 	// -------------------------------------------- //
@@ -1221,7 +1065,6 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// These methods are simply proxied in from the Mixin.
 	
 	// CONVENIENCE SEND MESSAGE
-	
 	public boolean sendMessage(Object message)
 	{
 		return MixinMessage.get().messagePredicate(new FactionEqualsPredicate(this), message);
@@ -1238,7 +1081,6 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	}
 	
 	// CONVENIENCE MSG
-	
 	public boolean msg(String msg)
 	{
 		return MixinMessage.get().msgPredicate(new FactionEqualsPredicate(this), msg);

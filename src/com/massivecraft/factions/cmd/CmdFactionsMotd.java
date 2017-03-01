@@ -65,10 +65,6 @@ public class CmdFactionsMotd extends FactionsCommand
 			old = msenderFaction.getMotd();
 		}
 		
-		// Target Desc
-		String targetDesc = target;
-		if (targetDesc == null) targetDesc = Txt.parse("<silver>nothing");
-		
 		// NoChange
 		if (MUtil.equals(old, target))
 		{
