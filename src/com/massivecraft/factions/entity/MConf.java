@@ -63,7 +63,9 @@ public class MConf extends Entity<MConf>
 	// -------------------------------------------- //
 	// WORLDS FEATURE ENABLED
 	// -------------------------------------------- //
-	
+
+	public int entityVersion = 0;
+
 	// Use this blacklist/whitelist system to toggle features on a per world basis.
 	// Do you only want claiming enabled on the one map called "Hurr"?
 	// In such case set standard to false and add "Hurr" as an exeption to worldsClaimingEnabled.

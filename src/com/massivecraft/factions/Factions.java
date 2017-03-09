@@ -53,6 +53,7 @@ import com.massivecraft.factions.entity.MConfColl;
 import com.massivecraft.factions.entity.MFlagColl;
 import com.massivecraft.factions.entity.MPermColl;
 import com.massivecraft.factions.entity.MPlayerColl;
+import com.massivecraft.factions.entity.migration.V002VersionMigratorFaction;
 import com.massivecraft.factions.event.EventFactionsChunkChangeType;
 import com.massivecraft.factions.integration.V19.IntegrationV19;
 import com.massivecraft.factions.integration.herochat.IntegrationHerochat;
@@ -135,10 +136,7 @@ public class Factions extends MassivePlugin
 		// Initialize Aspects
 		this.aspect = AspectColl.get().get(Const.ASPECT, true);
 		this.aspect.register();
-		this.aspect.setDesc(
-			"<i>If the factions system even is enabled and how it's configured.",
-			"<i>What factions exists and what players belong to them."
-		);
+		this.aspect.setDesc("<i>If the factions system even is enabled and how it's configured.", "<i>What factions exists and what players belong to them.");
 		
 		// Register types
 		RegistryType.register(Rel.class, TypeRel.get());
@@ -147,6 +145,9 @@ public class Factions extends MassivePlugin
 		// Register Faction accountId Extractor
 		// TODO: Perhaps this should be placed in the econ integration somewhere?
 		MUtil.registerExtractor(String.class, "accountId", ExtractorFactionAccountId.get());
+
+		// Databse converter
+		V002VersionMigratorFaction.get().setActive(true);
 
 		// Initialize Database
 		this.databaseInitialized = false;

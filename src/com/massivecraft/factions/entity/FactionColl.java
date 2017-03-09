@@ -31,7 +31,7 @@ public class FactionColl extends Coll<Faction>
 	// -------------------------------------------- //
 	// OVERRIDE: COLL
 	// -------------------------------------------- //
-	
+
 	@Override
 	public void setActive(boolean active)
 	{

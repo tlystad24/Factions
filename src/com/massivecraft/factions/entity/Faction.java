@@ -62,6 +62,7 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	@Override
 	public Faction load(Faction that)
 	{
+		this.version = that.version;
 		this.setName(that.name);
 		this.setDescription(that.description);
 		this.setMotd(that.motd);
@@ -103,7 +104,9 @@ public class Faction extends Entity<Faction> implements EconomyParticipator, Nam
 	// -------------------------------------------- //
 	// In this section of the source code we place the field declarations only.
 	// Each field has it's own section further down since just the getter and setter logic takes up quite some place.
-	
+
+	private int version = MConf.get().entityVersion;;
+
 	// The actual faction id looks something like "54947df8-0e9e-4471-a2f9-9af509fb5889" and that is not too easy to remember for humans.
 	// Thus we make use of a name. Since the id is used in all foreign key situations changing the name is fine.
 	// Null should never happen. The name must not be null.
