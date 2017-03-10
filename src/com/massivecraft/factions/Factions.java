@@ -20,31 +20,8 @@ import com.massivecraft.factions.chat.tag.ChatTagRole;
 import com.massivecraft.factions.chat.tag.ChatTagRoleprefix;
 import com.massivecraft.factions.chat.tag.ChatTagRoleprefixforce;
 import com.massivecraft.factions.chat.tag.ChatTagTitle;
-import com.massivecraft.factions.cmd.CmdFactions;
 import com.massivecraft.factions.cmd.type.TypeFactionChunkChangeType;
 import com.massivecraft.factions.cmd.type.TypeRel;
-import com.massivecraft.factions.engine.EngineCanCombatHappen;
-import com.massivecraft.factions.engine.EngineChat;
-import com.massivecraft.factions.engine.EngineChunkChange;
-import com.massivecraft.factions.engine.EngineDenyCommands;
-import com.massivecraft.factions.engine.EngineEcon;
-import com.massivecraft.factions.engine.EngineExploit;
-import com.massivecraft.factions.engine.EngineFlagEndergrief;
-import com.massivecraft.factions.engine.EngineFlagExplosion;
-import com.massivecraft.factions.engine.EngineFlagFireSpread;
-import com.massivecraft.factions.engine.EngineFlagSpawn;
-import com.massivecraft.factions.engine.EngineFlagZombiegrief;
-import com.massivecraft.factions.engine.EngineLastActivity;
-import com.massivecraft.factions.engine.EngineMotd;
-import com.massivecraft.factions.engine.EngineMoveChunk;
-import com.massivecraft.factions.engine.EnginePermBuild;
-import com.massivecraft.factions.engine.EnginePlayerData;
-import com.massivecraft.factions.engine.EnginePower;
-import com.massivecraft.factions.engine.EngineSeeChunk;
-import com.massivecraft.factions.engine.EngineShow;
-import com.massivecraft.factions.engine.EngineTeleportHomeOnDeath;
-import com.massivecraft.factions.engine.EngineTerritoryShield;
-import com.massivecraft.factions.engine.EngineVisualizations;
 import com.massivecraft.factions.entity.Board;
 import com.massivecraft.factions.entity.BoardColl;
 import com.massivecraft.factions.entity.Faction;
@@ -54,16 +31,7 @@ import com.massivecraft.factions.entity.MFlagColl;
 import com.massivecraft.factions.entity.MPermColl;
 import com.massivecraft.factions.entity.MPlayerColl;
 import com.massivecraft.factions.event.EventFactionsChunkChangeType;
-import com.massivecraft.factions.integration.V19.IntegrationV19;
-import com.massivecraft.factions.integration.herochat.IntegrationHerochat;
-import com.massivecraft.factions.integration.lwc.IntegrationLwc;
-import com.massivecraft.factions.integration.spigot.IntegrationSpigot;
-import com.massivecraft.factions.integration.worldguard.IntegrationWorldGuard;
 import com.massivecraft.factions.mixin.PowerMixin;
-import com.massivecraft.factions.task.TaskEconLandReward;
-import com.massivecraft.factions.task.TaskFlagPermCreate;
-import com.massivecraft.factions.task.TaskPlayerDataRemove;
-import com.massivecraft.factions.task.TaskPlayerPowerUpdate;
 import com.massivecraft.factions.update.UpdateUtil;
 import com.massivecraft.massivecore.Aspect;
 import com.massivecraft.massivecore.AspectColl;
@@ -166,50 +134,8 @@ public class Factions extends MassivePlugin
 		this.databaseInitialized = true;
 		
 		// Activate
-		this.activate(
-			// Command
-			CmdFactions.class,
-		
-			// Engines
-			EngineCanCombatHappen.class,
-			EngineChat.class,
-			EngineChunkChange.class,
-			EngineDenyCommands.class,
-			EngineExploit.class,
-			EngineFlagEndergrief.class,
-			EngineFlagExplosion.class,
-			EngineFlagFireSpread.class,
-			EngineFlagSpawn.class,
-			EngineFlagZombiegrief.class,
-			EngineLastActivity.class,
-			EngineMotd.class,
-			EngineMoveChunk.class,
-			EnginePermBuild.class,
-			EnginePlayerData.class,
-			EnginePower.class,
-			EngineSeeChunk.class,
-			EngineShow.class,
-			EngineTeleportHomeOnDeath.class,
-			EngineTerritoryShield.class,
-			EngineVisualizations.class,
-			EngineEcon.class, // TODO: Take an extra look and make sure all economy stuff is handled using events.
+		this.activateAuto();
 
-			// Integrate
-			IntegrationHerochat.class,
-			IntegrationLwc.class,
-			IntegrationWorldGuard.class,
-			IntegrationV19.class,
-			
-			// Spigot
-			IntegrationSpigot.class,
-			
-			// Modulo Repeat Tasks
-			TaskPlayerPowerUpdate.class,
-			TaskPlayerDataRemove.class,
-			TaskEconLandReward.class,
-			TaskFlagPermCreate.class
-		);
-		
 		// Register built in chat modifiers
 		ChatModifierLc.get().register();
 		ChatModifierLp.get().register();

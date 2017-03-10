@@ -29,11 +29,13 @@ import com.massivecraft.factions.event.EventFactionsFlagChange;
 import com.massivecraft.factions.event.EventFactionsRelationChange;
 import com.massivecraft.factions.event.EventFactionsTitleChange;
 import com.massivecraft.factions.integration.Econ;
+import com.massivecraft.massivecore.ActivePriority;
 import com.massivecraft.massivecore.Engine;
 import com.massivecraft.massivecore.money.Money;
 import com.massivecraft.massivecore.ps.PS;
 import com.massivecraft.massivecore.util.Txt;
 
+@ActivePriority(4001)
 public class EngineEcon extends Engine
 {
 	// -------------------------------------------- //
