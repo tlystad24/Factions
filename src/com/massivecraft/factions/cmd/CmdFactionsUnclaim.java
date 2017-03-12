@@ -19,13 +19,7 @@ public class CmdFactionsUnclaim extends FactionsCommand
 	
 	public CmdFactionsUnclaim()
 	{
-		// Children
-		this.addChild(this.cmdFactionsUnclaimOne);
-		this.addChild(this.cmdFactionsUnclaimAuto);
-		this.addChild(this.cmdFactionsUnclaimFill);
-		this.addChild(this.cmdFactionsUnclaimSquare);
-		this.addChild(this.cmdFactionsUnclaimCircle);
-		this.addChild(this.cmdFactionsUnclaimAll);
+
 	}
 	
 }

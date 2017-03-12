@@ -16,10 +16,7 @@ public class CmdFactionsRelation extends FactionsCommand
 
 	public CmdFactionsRelation()
 	{
-		// Children
-		this.addChild(this.cmdFactionsRelationSet);
-		this.addChild(this.cmdFactionsRelationList);
-		this.addChild(this.cmdFactionsRelationWishes);
+
 	}
 
 }

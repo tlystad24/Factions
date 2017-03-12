@@ -16,10 +16,7 @@ public class CmdFactionsInvite extends FactionsCommand
 	
 	public CmdFactionsInvite()
 	{
-		// Children
-		this.addChild(this.cmdFactionsInviteAdd);
-		this.addChild(this.cmdFactionsInviteRemove);
-		this.addChild(this.cmdFactionsInviteList);
+
 	}
 	
 }

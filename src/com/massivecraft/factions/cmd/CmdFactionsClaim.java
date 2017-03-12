@@ -19,13 +19,7 @@ public class CmdFactionsClaim extends FactionsCommand
 	
 	public CmdFactionsClaim()
 	{
-		// Children
-		this.addChild(this.cmdFactionsClaimOne);
-		this.addChild(this.cmdFactionsClaimAuto);
-		this.addChild(this.cmdFactionsClaimFill);
-		this.addChild(this.cmdFactionsClaimSquare);
-		this.addChild(this.cmdFactionsClaimCircle);
-		this.addChild(this.cmdFactionsClaimAll);
+
 	}
 	
 }

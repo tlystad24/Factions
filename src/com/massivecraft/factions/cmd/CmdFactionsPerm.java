@@ -16,10 +16,7 @@ public class CmdFactionsPerm extends FactionsCommand
 	
 	public CmdFactionsPerm()
 	{
-		// Children
-		this.addChild(this.cmdFactionsPermList);
-		this.addChild(this.cmdFactionsPermShow);
-		this.addChild(this.cmdFactionsPermSet);
+
 	}
 	
 }

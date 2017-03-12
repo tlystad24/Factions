@@ -16,10 +16,7 @@ public class CmdFactionsFlag extends FactionsCommand
 	
 	public CmdFactionsFlag()
 	{
-		// Children
-		this.addChild(this.cmdFactionsFlagList);
-		this.addChild(this.cmdFactionsFlagShow);
-		this.addChild(this.cmdFactionsFlagSet);
+
 	}
 	
 }
